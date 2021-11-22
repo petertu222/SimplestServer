@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using System.IO;
 using UnityEngine.UI;
+using System.Text;
 
 public class NetworkedServer : MonoBehaviour
 {
@@ -16,9 +17,13 @@ public class NetworkedServer : MonoBehaviour
 
     LinkedList<PlayerAccount> playerAccounts;
 
+    string playerAccountFilePath;
+
     // Start is called before the first frame update
     void Start()
     {
+        playerAccountFilePath = Application.dataPath + Path.DirectorySeparatorChar + "PlayerAccountData.txt";
+
         NetworkTransport.Init();
         ConnectionConfig config = new ConnectionConfig();
         reliableChannelID = config.AddChannel(QosType.Reliable);
@@ -27,7 +32,8 @@ public class NetworkedServer : MonoBehaviour
         hostID = NetworkTransport.AddHost(topology, socketPort, null);
 
         playerAccounts = new LinkedList<PlayerAccount>();
-        
+
+        LoadPlayerAccounts();
     }
 
     // Update is called once per frame
@@ -95,6 +101,8 @@ public class NetworkedServer : MonoBehaviour
                 playerAccounts.AddLast(new PlayerAccount(n, p));
 
                 SendMessageToClient(ServerToClientSignifiers.LoginResponse + "," + LoginResponses.Success, id);
+
+                SavePlayerAccounts();
             }
             else
             {
@@ -143,6 +151,36 @@ public class PlayerAccount
         password = Password;
     }
 }
+
+private void SavePlayerAccounts()
+{
+    StreamWriter sw = new StreamWriter(playerAccountFilePath);
+    foreach(PlayerAccount pa in playerAccounts)
+    {
+        sw.WriteLine(pa.name + "," + pa.password);
+    }
+    sw.Close();
+}
+
+private void LoadPlayerAccounts()
+{
+    File.Exists(playerAccountFilePath);
+
+    StreamWriter sr = new StreamWriter(playerAccountFilePath);
+    string line;
+    while(line = sr.ReadLine() != null)
+    {
+        string[] csv = line.Split(',');
+        PlayerAccount pa = new PlayerAccount(csv[0], csv[1]);
+        LoadPlayerAccounts.AddLast(pa);
+    }
+}
+
+public class GameSession
+{ 
+
+}
+
 
 public static class ClientToServerSignifiers
 {
