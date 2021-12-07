@@ -152,7 +152,7 @@ public class NetworkedServer : MonoBehaviour
             else
             {
                 GameSession gs = new GameSession(playerWaitingForMatch, id);
-                gameSessions.addLast(gs);
+                gameSessions.AddLast(gs);
                 SendMessageToClient(ServerToClientSignifiers.GameSeesionStarted + "", id);
                 SendMessageToClient(ServerToClientSignifiers.GameSeesionStarted + "", playerWaitingForMatch);
 
@@ -207,7 +207,7 @@ public class NetworkedServer : MonoBehaviour
         {
             if(gs.playerID1 == id || gs.playerID2 == id)
             {
-                retrun gs;
+                return gs;
             }
         }
 
